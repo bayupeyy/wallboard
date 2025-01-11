@@ -94,39 +94,81 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <?php
-                    // URL API
-                    $url = "http://10.60.175.132/ideas_new_pds_ok_dev/wall_agent/walls.php";
+    <?php
+    // URL API
+    $url = "http://10.60.175.132/ideas_new_pds_ok_dev/wall_agent/walls.php";
 
-                    // Mengambil data JSON dari API
-                    $data = @file_get_contents($url);
+    // Mengambil data JSON dari API
+    $data = @file_get_contents($url);
 
-                    if ($data === false) {
-                        echo "<tr><td colspan='7' class='text-center text-danger'>Gagal Mengakses Data. Periksa API atau Koneksi Anda.</td></tr>";
-                    } else {
-                        // Mengurai data JSON menjadi array PHP
-                        $data = json_decode($data, true);
+    if ($data === false) {
+        echo "<tr><td colspan='7' class='text-center text-danger'>Gagal Mengakses Data. Periksa API atau Koneksi Anda.</td></tr>";
+    } else {
+        // Mengurai data JSON menjadi array PHP
+        $data = json_decode($data, true);
 
-                        // Memeriksa apakah data valid
-                        if ($data === null || !is_array($data)) {
-                            echo "<tr><td colspan='7' class='text-center text-danger'>Data JSON Tidak Valid.</td></tr>";
-                        } else {
-                            // Menampilkan data dalam bentuk tabel
-                            foreach ($data as $agent) {
-                                echo "<tr class='agent-row' data-status-agent='" . htmlspecialchars($agent['agent_status']) . "'>";
-                                echo "<td>" . htmlspecialchars($agent['username']) . "</td>";
-                                echo "<td>" . htmlspecialchars($agent['login_user']) . "</td>";
-                                echo "<td>" . htmlspecialchars($agent['dial_mode']) . "</td>";
-                                echo "<td>" . htmlspecialchars($agent['agent_status']) . "</td>";
-                                echo "<td>" . htmlspecialchars($agent['extension']) . "</td>";
-                                echo "<td>" . (empty($agent['tot_call']) ? "N/A" : htmlspecialchars($agent['tot_call'])) . "</td>";
-                                echo "<td>" . htmlspecialchars($agent['last_exec']) . "</td>";
-                                echo "</tr>";
-                            }
-                        }
-                    }
-                    ?>
-                </tbody>
+        // Memeriksa apakah data valid
+        if ($data === null || !is_array($data)) {
+            echo "<tr><td colspan='7' class='text-center text-danger'>Data JSON Tidak Valid.</td></tr>";
+        } else {
+            // Filter data untuk menyembunyikan "infobandung32 - 11001" dan "infobandung56 - 11002"
+            $filteredData = array_filter($data, function ($agent) {
+                $excludedUsers = ['infobandung32 - 11001',
+                                'infobandung02 - 11079',
+                                'infobandung04 - 11009',
+                                'infobandung05 - 11008',
+                                'infobandung07 - 11033',
+                                'infobandung08 - 11010',
+                                'infobandung09 - 11094',
+                                'infobandung11 - 11023',
+                                'infobandung12 - 11089',
+                                'infobandung13 - 11061',
+                                'infobandung14 - 11013',
+                                'infobandung16 - 11095',
+                                'infobandung17 - 11073',
+                                'infobandung19 - 11017',
+                                'infobandung38 - 11070',
+                                'infobandung56 - 11002',
+                                'infobandung67 - 11068',
+                                'infobandung33 - 11005',
+                                'infobandung73 - 11004',
+                                'infobandung77 - 11007',
+                                'infobandung69 - 11011',
+                                'infobandung72 - 11014',
+                                'infobandung35 - 11015',
+                                'infobandung65 - 11016',
+                                'infobandung25 - 11003',
+                                'infobandung25 - 11003',
+                                'infobandung25 - 11003',
+                                'infobandung25 - 11003',
+                                'infobandung25 - 11003',
+                                'infobandung25 - 11003',
+                                'infobandung25 - 11003',];
+                return isset($agent['login_user']) && !in_array($agent['login_user'], $excludedUsers);
+            });
+
+            // Periksa jika data hasil filter kosong
+            if (empty($filteredData)) {
+                echo "<tr><td colspan='7' class='text-center text-warning'>Tidak ada data untuk ditampilkan.</td></tr>";
+            } else {
+                // Menampilkan data hasil filter dalam bentuk tabel
+                foreach ($filteredData as $agent) {
+                    echo "<tr class='agent-row' data-status-agent='" . htmlspecialchars($agent['agent_status']) . "'>";
+                    echo "<td>" . htmlspecialchars($agent['username']) . "</td>";
+                    echo "<td>" . htmlspecialchars($agent['login_user']) . "</td>";
+                    echo "<td>" . htmlspecialchars($agent['dial_mode']) . "</td>";
+                    echo "<td>" . htmlspecialchars($agent['agent_status']) . "</td>";
+                    echo "<td>" . htmlspecialchars($agent['extension']) . "</td>";
+                    echo "<td>" . (empty($agent['tot_call']) ? "N/A" : htmlspecialchars($agent['tot_call'])) . "</td>";
+                    echo "<td>" . htmlspecialchars($agent['last_exec']) . "</td>";
+                    echo "</tr>";
+                }
+            }
+        }
+    }
+    ?>
+</tbody>
+
             </table>
         </div>
     </div>
